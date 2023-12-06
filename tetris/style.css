@@ -1,0 +1,101 @@
+@import url("https://fonts.googleapis.com/css?family=Khula&display=swap");
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+a:active, /* активная/посещенная ссылка */
+a:hover,  /* при наведении */
+a {
+  text-decoration: none;
+  color: #000;
+}
+
+body {
+  background: linear-gradient(90deg, #29323c 0%, #485563 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100vh;
+  overflow: hidden;
+  font-family: "Khula", sans-serif;
+}
+
+.tetris-wrapper {
+  display: flex;
+  gap: 150px;
+}
+
+.tetris-start {
+  display: flex;
+  flex-direction: column;
+  gap: 100px;
+  justify-content: center;
+  align-items: flex-start;
+  color: #d0d0d0c9;
+  font-size: 36px;
+}
+
+.tetris-start a {
+  box-shadow: -8px -8px 20px #2a333d, 10px 7px 20px #1d242c;
+  border-radius: 5px;
+  background: #d0d0d04a;
+  padding: 15px;
+  width: 300px;
+  height: 100px;
+  border: none;
+  font-size: 24px;
+  text-align: center;
+  cursor: pointer;
+  display: inline-block;
+  padding: 32px;
+}
+
+.tetris-canvas__container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  background: linear-gradient(118.38deg, #29323c -4.6%, #485563 200.44%);
+  box-shadow: -8px -8px 20px #2a333d, 10px 7px 20px #475462;
+  border-radius: 5px;
+  overflow: hidden;
+}
+
+.tetris-rules {
+  box-shadow: -8px -8px 20px #2a333d, 10px 7px 20px #475462;
+  border-radius: 5px;
+  background: #d0d0d04a;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+}
+
+.tetris-rules__keyboard {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: black;
+}
+
+.tetris-rules__keyboard img {
+  width: 30px;
+  height: 30px;
+  margin-right: 10px;
+}
+
+/* .square {
+  width: 16px;
+  height: 16px;
+  background: #1d1d1d;
+  margin: 2px;
+  box-shadow: 0 0 2px #000;
+  transition: 2s ease;
+} */
+/* .square {
+  width: 50px;
+  height: 35px;
+} */
