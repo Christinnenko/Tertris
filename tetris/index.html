@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="style.css" />
+    <link
+      href="data:image/x-icon;base64,AAABAAEAEBAQAAAAAAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAgAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA5ttqAOZqtgBq5moA5mrfAGqu5gBqgOYA5qpqAGrf5gAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJ3dyIiREQXcidzMzZIMxFyJENVZmgzEXIEQFUBGGYVcAAAAAEYZkVQAABEAARERVAAAAQAAAAFYQAABAAAAAZhAAAEAHAABmEAAAAAcAAAYQAAAABwAAAAAACAAHAAAAAHcIiIAAIgAAdwAAAAIiIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABJAAAA/wAAAPnAAAD9/AAAffwAAH28AAB/vgAAf78AAPu/AADIcwAAz+EAAP//AAD//wAA"
+      rel="icon"
+      type="image/x-icon"
+    />
+    <title>Game: Tetris</title>
+  </head>
+  <body>
+    <div class="tetris-wrapper">
+      <div class="tetris-start">
+        <h2>Уровень <span id="level">1</span></h2>
+        <h2>Счет <span id="score">0</span></h2>
+        <h2>Время <span id="time">00:00</span></h2>
+        <a id="start" href="#">Начать игру</a>
+      </div>
+      <div class="tetris-canvas">
+        <canvas class="tetris-canvas__container" id="board"></canvas>
+      </div>
+      <div class="tetris-rules">
+        <div class="tetris-rules__keyboard">
+          <img src="images/up-key.png" alt="развернуть фигуру" />
+          <p>- развернуть фигуру</p>
+        </div>
+        <div class="tetris-rules__keyboard">
+          <img src="images/down-key.png" alt="сдвинуть фигуру вниз" />
+          <p>- ускорить падение фигуры</p>
+        </div>
+        <div class="tetris-rules__keyboard">
+          <img src="images/left-key.png" alt="сдвинуть фигуру влево" />
+          <p>- сдвинуть фигуру влево</p>
+        </div>
+        <div class="tetris-rules__keyboard">
+          <img src="images/right-key.png" alt="сдвинуть фигуру вправо" />
+          <p>- сдвинуть фигуру вправо</p>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>
