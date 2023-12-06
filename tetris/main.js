@@ -1,21 +1,29 @@
-const canvas = document.getElementById("board");
-const context = canvas.getContext("2d");
-const rows = 20;
+const canvas = document.getElementById("board"); // Получаем ссылку на элемент холста с идентификатором "board"
+const context = canvas.getContext("2d"); // Получаем контекст рисования 2D для холста
+const rows = 20; // Количество строк и столбцов в игровом поле
 const columns = 10;
-const squareSize = 40;
-let counter = document.getElementById("score");
-let score = parseInt(counter.innerHTML);
-let time = document.getElementById("time");
-let timer = 0;
-const levelElement = document.getElementById("level");
-let currentLevel = 1;
-canvas.width = columns * squareSize;
+const squareSize = 40; // Размер квадрата (ячейки) на игровом поле
+let counter = document.getElementById("score"); // Получаем ссылку на элемент с идентификатором "score"
+let score = parseInt(counter.innerHTML); // Извлекаем значение счета из HTML-элемента и преобразуем его в число
+let time = document.getElementById("time"); // Получаем ссылку на элемент с идентификатором "time"
+let timer = 0; // Инициализируем переменную для хранения времени игры
+const levelElement = document.getElementById("level"); // Получаем ссылку на элемент с идентификатором "level"
+let currentLevel = 1; // Инициализируем переменную для хранения текущего уровня
+canvas.width = columns * squareSize; // Устанавливаем размеры холста в соответствии с размерами игрового поля и квадрата
 canvas.height = rows * squareSize;
+let count = 0; // Инициализируем переменные для отслеживания кадров анимации
+let start = null;
+let gameOver = false; // Флаг завершения игры
+let timerId; // Идентификатор таймера
+let baseSpeed = 35; // Базовая скорость падения фигур
+let speedIncreaseInterval; // Интервал увеличения скорости падения фигур
+const speedIncreaseIntervalTime = 30000; // Время между увеличениями скорости (30сек)
+let timeSinceLastSpeedIncrease = 0; // Время, прошедшее с последнего увеличения скорости
+let isGameRunning = false; // Флаг, указывающий на текущий статус игры (запущена или нет)
+const buttonStart = document.getElementById("start"); // Получаем ссылку на кнопку с идентификатором "start"
 
-// с помощью двумерного массива следим за тем, что находится в каждой клетке игрового поля
-// размер поля — 10 на 20, и несколько строк ещё находится за видимой областью
+// двумерный массив игрового поля, заполняем пустыми ячейками (0)
 let arrayField = [];
-// заполняем сразу массив пустыми ячейками
 for (let row = -2; row < 20; row++) {
   arrayField[row] = [];
 
@@ -24,6 +32,7 @@ for (let row = -2; row < 20; row++) {
   }
 }
 
+//фигуры тетриса
 const figures = {
   I: {
     coordinates: [
@@ -83,53 +92,38 @@ const figures = {
   },
 };
 
-// счётчик
-let count = 0;
-// текущая фигура в игре
-let figure = getFigure();
-// следим за кадрами анимации, чтобы если что — остановить игру
-let start = null;
-// флаг конца игры, на старте — неактивный
-let gameOver = false;
-
 // получаем следующую фигуру
 function getFigure() {
   // Получаем все ключи (названия фигур) из объекта figures
   const figureNames = Object.keys(figures);
-
   // Выбираем случайное название фигуры из массива figureNames
   const randomIndex = Math.floor(Math.random() * figureNames.length);
   const randomFigureName = figureNames[randomIndex];
-
   // Получаем информацию о случайной фигуре из объекта figures
   const { coordinates, color } = figures[randomFigureName];
-
   // I и O стартуют с середины, остальные — чуть левее
   const col = arrayField[0].length / 2 - Math.ceil(coordinates[0].length / 2);
-
   // I начинает с 21 строки (смещение -1), а все остальные — со строки 22 (смещение -2)
   const row = randomFigureName === "I" ? -1 : -2;
 
-  // вот что возвращает функция
   return {
     name: randomFigureName, // название фигуры (L, O, и т.д.)
     matrix: coordinates, // матрица с фигурой
-    row: row, // текущая строка (фигуры стартую за видимой областью холста)
+    row: row, // текущая строка (фигуры стартуют за видимой областью холста)
     col: col, // текущий столбец
     color: color, // цвет фигуры
   };
 }
 
-// поворачиваем матрицу на 90 градусов
-// https://codereview.stackexchange.com/a/186834
+// поворачиваем матрицу с фигурой на 90 градусов
 function rotate(matrix) {
   const N = matrix.length - 1;
   const result = matrix.map((row, i) => row.map((val, j) => matrix[N - j][i]));
-  // на входе матрица, и на выходе тоже отдаём матрицу
+  // на входе  и выходе - матрица с фигурой
   return result;
 }
 
-// проверяем после появления или вращения, может ли матрица (фигура) быть в этом месте поля или она вылезет за его границы
+// проверяем после появления или вращения, может ли матрица с фигурой быть в этом месте поля или она вылезет за его границы
 function isValidMove(matrix, cellRow, cellCol) {
   // проверяем все строки и столбцы
   for (let row = 0; row < matrix.length; row++) {
@@ -143,13 +137,11 @@ function isValidMove(matrix, cellRow, cellCol) {
           // …или пересекается с другими фигурами
           arrayField[cellRow + row][cellCol + col])
       ) {
-        // то возвращаем, что нет, так не пойдёт
-        return false;
+        return false; // то возвращаем, что так ставить нельзя
       }
     }
   }
-  // а если мы дошли до этого момента и не закончили раньше — то всё в порядке
-  return true;
+  return true; // иначе ставить можно
 }
 
 // когда фигура окончательна встала на своё место
@@ -207,22 +199,18 @@ function placeFigure() {
       break;
   }
 
-  // увеличиваем общий счет
-  score += lineScore;
+  score += lineScore; // увеличиваем общий счет
   counter.innerHTML = score;
 
-  // получаем следующую фигуру
-  figure = getFigure();
+  figure = getFigure(); // получаем следующую фигуру
 }
 
 // показываем надпись Game Over
 function showGameOver() {
-  // прекращаем всю анимацию игры
-  cancelAnimationFrame(start);
-  // ставим флаг окончания
-  gameOver = true;
+  cancelAnimationFrame(start); // прекращаем всю анимацию игры
+  gameOver = true; // ставим флаг окончания
 
-  // рисуем чёрный прямоугольник посередине поля с некоторым запасом по высоте
+  // рисуем чёрный прямоугольник посередине поля
   const rectHeight = 250;
   context.fillStyle = "black";
   context.globalAlpha = 0.75;
@@ -234,13 +222,12 @@ function showGameOver() {
   );
 
   // пишем надпись белым моноширинным шрифтом по центру
-  context.globalAlpha = 1;
   context.fillStyle = "white";
   context.font = "32px monospace";
   context.textAlign = "center";
   context.textBaseline = "middle";
 
-  // создаем строки с переносами
+  // создаем строки
   const lines = [
     "GAME OVER!",
     `Счет: ${score}`,
@@ -261,14 +248,7 @@ function showGameOver() {
     );
   });
 
-  // Остановка интервала таймера
-  stopTimer();
-
-  // Останавливаем интервал увеличения уровней, если он был определен
-  if (speedIncreaseInterval) {
-    clearInterval(speedIncreaseInterval);
-    speedIncreaseInterval = null; // сбрасываем переменную интервала
-  }
+  stopTimer(); // Остановка интервала таймера
 
   // Добавляем условие: уровень не увеличивается после завершения игры
   if (!gameOver) {
@@ -278,8 +258,16 @@ function showGameOver() {
     levelElement.innerHTML = currentLevel;
   }
 }
-// Объявляем переменную для хранения идентификатора таймера
-let timerId;
+
+function updateTimer() {
+  timerId = setTimeout(() => {
+    if (!gameOver) {
+      timer++;
+      time.innerHTML = formatTime(timer);
+      updateTimer(); // Рекурсивный вызов для обновления каждую секунду
+    }
+  }, 1000);
+}
 
 // Функция остановки таймера
 function stopTimer() {
@@ -290,6 +278,8 @@ function stopTimer() {
 function game() {
   // начинаем анимацию
   start = requestAnimationFrame(game);
+
+  isGameRunning = true;
   // очищаем холст
   context.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -359,7 +349,7 @@ function game() {
 
 // следим за нажатиями на клавиши
 document.addEventListener("keydown", function (e) {
-  // если игра закончилась — сразу выходим
+  // если игра закончилась — отключаем клавиши
   if (gameOver) return;
 
   // стрелки влево и вправо
@@ -402,11 +392,7 @@ document.addEventListener("keydown", function (e) {
   }
 });
 
-let baseSpeed = 35; // Базовая скорость
-let speedIncreaseInterval;
-const speedIncreaseIntervalTime = 30000; //
-let timeSinceLastSpeedIncrease = 0;
-
+//форматируем дату мм:cc
 function formatTime(seconds) {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = seconds % 60;
@@ -415,29 +401,19 @@ function formatTime(seconds) {
   return `${formattedMinutes}:${formattedSeconds}`;
 }
 
-let isGameRunning = false;
-const buttonStart = document.getElementById("start");
-
 //обработчик клика на кнопку "Начать игру"
-export function listenerStartButton() {
+function listenerStartButton() {
   buttonStart.addEventListener("click", () => {
     if (!isGameRunning) {
-      // Если игра не запущена, начать новую игру
-      startGame();
+      startGame(); // Если игра не запущена, начать новую игру
     } else {
-      // Если игра уже запущена, начать заново
-      restartGame();
+      restartGame(); // Если игра уже запущена, начать заново
     }
   });
 }
 
-//запуск игры
-export function startGame() {
-  // старт игры
-  game();
-  isGameRunning = true;
-  buttonStart.innerHTML = "Начать заново";
-
+//повышение уровня и скорости
+function upLevel() {
   speedIncreaseInterval = setInterval(() => {
     // Увеличиваем базовую скорость
     baseSpeed = Math.max(baseSpeed - 3, 0);
@@ -446,42 +422,34 @@ export function startGame() {
     // Обновляем отображение уровня на странице
     levelElement.innerHTML = currentLevel;
   }, speedIncreaseIntervalTime);
+}
 
-  function updateTimer() {
-    timerId = setTimeout(() => {
-      timer++;
-      time.innerHTML = formatTime(timer);
-      updateTimer(); // Рекурсивный вызов для обновления каждую секунду
-    }, 1000);
-  }
-
-  // Запустите таймер при начале игры
+//запуск игры
+function startGame() {
+  game();
+  buttonStart.innerHTML = "Начать заново";
+  //запуск увеличения уровня и таймера
+  upLevel();
   updateTimer();
 }
 
 //перезапуск игры
-export function restartGame() {
-  count = 0;
+function restartGame() {
   isGameRunning = false;
   gameOver = false;
 
-  // Обнуляем счетчик
+  // Обнуляем счетчик, таймер, скорость, уровень
   score = 0;
   counter.innerHTML = score;
-
-  // Обнуляем таймер
   timer = 0;
   time.innerHTML = formatTime(timer);
-
-  //Обнуляем скорость
   baseSpeed = 35;
-
-  //Обнуляем уровень
   currentLevel = 1;
   levelElement.innerHTML = currentLevel;
 
-  // Останавливаем предыдущий цикл игры
+  // Останавливаем предыдущий цикл игры и интервал увеличения скорости
   cancelAnimationFrame(start);
+  clearInterval(speedIncreaseInterval);
 
   // Очищаем массив игрового поля
   arrayField = [];
@@ -492,20 +460,12 @@ export function restartGame() {
     }
   }
 
-  // Останавливаем интервал увеличения скорости
-  clearInterval(speedIncreaseInterval);
-
-  // Получаем новую фигуру
-  figure = getFigure();
-
-  // Начинаем новый цикл игры
-  start = requestAnimationFrame(game);
-  isGameRunning = true;
-  speedIncreaseInterval = setInterval(() => {
-    baseSpeed = Math.max(baseSpeed - 3, 0);
-  }, speedIncreaseIntervalTime);
-
+  game(); // Начинаем новый цикл игры
+  figure = getFigure(); // Получаем новую фигуру
+  upLevel();
   updateTimer();
 }
 
+// текущая фигура в игре
+let figure = getFigure();
 listenerStartButton();
