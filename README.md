@@ -1,1 +1,7 @@
-# https://christinnenko.github.io/Tertris/
+# Игра «Тетрис»
+
+## Игра «Тетрис» - классическая игра «Тетрис». Реализована механика падающих фигур, их повороты, перемещения и ускорение. Добавлена система счета и проверки на конец игры при достижении верхней границы.
+
+### Деплой проекта: https://christinnenko.github.io/Tertris/
+
+![image](https://github.com/Christinnenko/Tertris/assets/135636897/fde2ba95-0d19-4d8f-b46a-397fccbfeb6c)
