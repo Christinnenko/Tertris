@@ -5,3 +5,10 @@
 ### Деплой проекта: https://christinnenko.github.io/Tertris/
 
 ![image](https://github.com/Christinnenko/Tertris/assets/135636897/fde2ba95-0d19-4d8f-b46a-397fccbfeb6c)
+
+## Технологии:
+
+HTML, Canvas, CSS, JavaScript (без использования сторонних библиотек и фреймворков согласно ТЗ)
+
+
+
